@@ -1,0 +1,32 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches: ['main']
+  workflow_run:
+    workflows: ['CI Pipeline']
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - name: Pull Docker image
+        run: sudo docker pull yassirrachad/bebliothech:latest
+
+      - name: Ensure Old Docker Container is Stopped and Removed
+        run: |
+          sudo docker stop bebliothech-container || true
+          sudo docker rm -f bebliothech-container || true
+
+      - name: Check if port 3001 is in use
+        run: |
+          if sudo ss -tuln | grep -q ':3000'; then
+            echo "Port 3001 is in use. Stopping conflicting container or process."
+            sudo fuser -k 3001/tcp || true
+          fi
+
+      - name: Run Docker Container
+        run: sudo docker run -d -p 3000:3000 --name bebliothech-container yassirrachad/bebliothech
