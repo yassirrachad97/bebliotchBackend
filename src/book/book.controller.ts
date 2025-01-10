@@ -8,7 +8,10 @@ import { UpdateBookDto } from './DTO/update-book.dto';
 export class BookController {
     constructor(private readonly bookService: BookService){}
 
-
+@Get('hello')
+    getHello(): string {
+        return 'hello';
+    }
     @Post('AddBook')
     async ajoutBook(@Body() createBookDto: CreateBookDto): Promise<any>{
         return  this.bookService.addBook(createBookDto);
